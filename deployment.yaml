@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alpine-dep
+
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata: 
+      name: demo-pod-2
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: demo-container
+        image: alpine
