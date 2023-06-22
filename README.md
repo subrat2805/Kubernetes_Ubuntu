@@ -94,18 +94,16 @@ This documentation guides you in setting up a cluster with one master node and t
     ``To be able to use kubectl command to connect and interact with the cluster, the user needs kube config file.``  
     In this case, we are creating a user called `kubeadmin`
     ```sh
-    useradd kubeadmin 
-    mkdir /home/kubeadmin/.kube
-    cp /etc/kubernetes/admin.conf /home/kubeadmin/.kube/config
-    chown -R kubeadmin:kubeadmin /home/kubeadmin/.kube
+    mkdir -p $HOME/.kube
+    sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+    sudo chown $(id -u):$(id -g) $HOME/.kube/config
     ```
 1. Deploy Calico network as a __kubeadmin__ user. 
 	> This should be executed as a user (heare as a __kubeadmin__ )
     
     ```sh
-    sudo su - kubeadmin 
-    curl https://docs.projectcalico.org/manifests/calico.yaml -o calico.yaml
-    kubectl apply -f calico.yaml
+    kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/tigera-operator.yaml
+    kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/custom-resources.yaml
     ```
 
 1. Cluster join command
@@ -131,10 +129,10 @@ This documentation guides you in setting up a cluster with one master node and t
 
 
 # RUN-TIME ERROR HANDLE
-
-rm -rf /etc/containerd/config.toml
-
-systemctl restart containerd
+ ```sh
+    rm -rf /etc/containerd/config.toml
+    systemctl restart containerd
+ ```
 
 ----------------------------------------
 # For label change
