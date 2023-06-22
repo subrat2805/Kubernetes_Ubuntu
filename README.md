@@ -1,7 +1,7 @@
 # k8s-resource
 
 # Kubernetes Cluster installation using kubeadm
-Follow this documentation to set up a Kubernetes cluster on **REDHAT** machines.
+Follow this documentation to set up a Kubernetes cluster on **CENTOS** machines.
 
 This documentation guides you in setting up a cluster with one master node and two worker nodes.
 
