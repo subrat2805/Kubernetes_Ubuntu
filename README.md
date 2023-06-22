@@ -92,14 +92,13 @@ This documentation guides you in setting up a cluster with one master node and t
     ```
 1. Create a user for kubernetes administration  and copy kube config file.   
     ``To be able to use kubectl command to connect and interact with the cluster, the user needs kube config file.``  
-    In this case, we are creating a user called `kubeadmin`
     ```sh
     mkdir -p $HOME/.kube
     sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
     sudo chown $(id -u):$(id -g) $HOME/.kube/config
     ```
-1. Deploy Calico network as a __kubeadmin__ user. 
-	> This should be executed as a user (heare as a __kubeadmin__ )
+1. Deploy Calico network. 
+	> This should be executed as a user where config file is copied
     
     ```sh
     kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/tigera-operator.yaml
