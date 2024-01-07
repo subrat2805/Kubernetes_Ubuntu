@@ -1,7 +1,7 @@
 # k8s-resource
 
 # Kubernetes Cluster installation using kubeadm
-Follow this documentation to set up a Kubernetes cluster on **CENTOS** machines.
+Follow this documentation to set up a Kubernetes cluster on **Ubuntu** machines.
 
 This documentation guides you in setting up a cluster with one master node and two worker nodes.
 
@@ -10,7 +10,7 @@ This documentation guides you in setting up a cluster with one master node and t
     >Master: t2.medium (2 CPUs and 2GB Memory)   
     >Worker Nodes: t2.medium 
 
-1. Open Below ports in the Security Group. 
+1. Open the Below ports in the Security Group and launch all the instances with the same security groups 
    #### Master node: 
     `6443  
     32750  
@@ -28,27 +28,35 @@ This documentation guides you in setting up a cluster with one master node and t
  
    Install, Enable and start docker service.
    Use the Docker repository to install docker.
-   > If you use docker from CentOS OS repository, the docker version might be old to work with Kubernetes v1.13.0 and above
+   > While creating instances in AWS select the Ubuntu server version 20.04
 
    ```sh
-   sudo yum install -y yum-utils
-   sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-   sudo yum install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+   apt-get update
+   apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+   echo "deb [signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+   apt-get update
+   apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose
+
    ```
 1. Start Docker services 
    ```sh
    systemctl enable docker
    systemctl start docker
    ```
-1. Disable SELinux
+1. Disable AppArmor
    ```sh
-   setenforce 0
-   sed -i --follow-symlinks 's/^SELINUX=enforcing/SELINUX=disabled/' /etc/sysconfig/selinux
+   sudo systemctl stop apparmor
+   sudo systemctl disable apparmor
    ```
-1. Disable Firewall
+1. Reload the systemd manager configuration
    ```sh
-   systemctl disable firewalld
-   systemctl stop firewalld
+   sudo systemctl daemon-reload
+   ```   
+1. Disable Uncomplicated Firewall
+   ```sh
+   sudo ufw disable
+   sudo systemctl stop ufw
    ```
 1. Disable swap
      ```sh
