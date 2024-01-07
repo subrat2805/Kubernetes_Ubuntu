@@ -34,7 +34,7 @@ This documentation guides you in setting up a cluster with one master node and t
    sudo apt-get update
    sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-   echo "deb [signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+   echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
    sudo apt-get update
    sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose
 
@@ -48,21 +48,19 @@ This documentation guides you in setting up a cluster with one master node and t
    ```sh
    sudo systemctl stop apparmor
    sudo systemctl disable apparmor
+   sudo sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash apparmor=0"/' /etc/default/grub
+   sudo update-grub
    ```
-1. Reload the systemd manager configuration
-   ```sh
-   sudo systemctl daemon-reload
-   ```   
 1. Disable Uncomplicated Firewall
    ```sh
-   sudo ufw disable
+   sudo systemctl disable ufw
    sudo systemctl stop ufw
    ```
 1. Disable swap
-     ```sh
-     sed -i '/swap/d' /etc/fstab
-     swapoff -a
-    ```
+   ```sh
+    sudo sed -i '/swap/d' /etc/fstab
+    sudo swapoff -a
+   ```
 1. Update sysctl settings for Kubernetes networking
    ```sh
    sudo tee /etc/sysctl.d/kubernetes.conf<<EOF
@@ -74,19 +72,17 @@ This documentation guides you in setting up a cluster with one master node and t
 ## Kubernetes Setup
 1. Add yum repository for kubernetes packages 
     ```sh
-    sudo tee /etc/yum.repos.d/kubernetes.repo<<EOF
-    [kubernetes]
-    name=Kubernetes
-    baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
-    enabled=1
-    gpgcheck=1
-    repo_gpgcheck=1
-    gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+    sudo tee /etc/apt/sources.list.d/kubernetes.list <<EOF
+    deb https://apt.kubernetes.io/ kubernetes-xenial main
     EOF
+    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys B53DC80D13EDEF05
+    curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/kubernetes-archive-keyring.gpg
+    sudo apt-get update
     ```
 1. Install Kubernetes
     ```sh
-    yum install -y kubeadm kubelet kubectl
+    sudo apt-get update
+    sudo apt-get install -y kubeadm kubelet kubectl
     ```
 1. Enable and Start kubelet service
     ```sh
@@ -96,9 +92,16 @@ This documentation guides you in setting up a cluster with one master node and t
 ## `On Master Node Only:`
 1. Initialize Kubernetes Cluster
     ```sh
-    kubeadm init --apiserver-advertise-address=<MasterServerIP> --pod-network-cidr=192.168.0.0/16
+    sudo kubeadm init --apiserver-advertise-address=<MasterServerIP> --pod-network-cidr=192.168.0.0/16
     ```
-1. Create a user for kubernetes administration  and copy kube config file.   
+
+## `RUN-TIME ERROR HANDLE:`
+1. During initializing the kubedam if you encounter any error, then by using the blow command you can handle that error
+    ```sh
+    sudo rm -rf /etc/containerd/config.toml
+    sudo systemctl restart containerd
+    ```
+1. Copy kube config file.   
     ``To be able to use kubectl command to connect and interact with the cluster, the user needs kube config file.``  
     ```sh
     mkdir -p $HOME/.kube
@@ -135,11 +138,7 @@ This documentation guides you in setting up a cluster with one master node and t
     ```
 
 
-# RUN-TIME ERROR HANDLE
- ```sh
-    rm -rf /etc/containerd/config.toml
-    systemctl restart containerd
- ```
+
 
 ----------------------------------------
 # For label change
