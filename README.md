@@ -95,8 +95,8 @@ This documentation guides you in setting up a cluster with one master node and t
     sudo kubeadm init --apiserver-advertise-address=<MasterServerIP> --pod-network-cidr=192.168.0.0/16
     ```
 
-## `RUN-TIME ERROR HANDLE:`
-1. During initializing the kubedam if you encounter any error, then by using the blow command you can handle that error
+# `RUN-TIME ERROR HANDLE:`
+   During initializing the kubedam if you encounter any error, then by using the blow command you can handle that error
     ```sh
     sudo rm -rf /etc/containerd/config.toml
     sudo systemctl restart containerd
